@@ -19,6 +19,11 @@ To actually play music: call `TD_SOUND::Venue::getInstance().queueMusic()` passi
 The song at the front of the queue can be looped using `TD_SOUND::Venue::getInstance().toggleLoop()`.
 Also, you can install a callback for when the last song in the queue ends: `TD_SOUND::Venue::getInstance().addMusicCallback()`. The called function takes no arguments and will not return anything.
 
+### Example Program
+
+To get the example program to work, copy any of the examples in the SampleMusic directory and put it in the same directory as the compiled program. Then, rename it "Music.txt".  
+None of that music is mine. I didn't create any of it. I'm just using it as an example of what the engine is capable of.
+
 Music Macro Language
 --------------------
 
