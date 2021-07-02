@@ -1,0 +1,32 @@
+t150itvfff o5 e <b8 >c8 d c8 <b8 a a8 >c8 e d8 c8 <b b8 >c8 d e c <a a r r8 >d f8 a8 a16 a16 g8 f8 e r8 c8 e8 e16 e16 d8 c8 <b b8 >c8 d e c <a a r >e <b8 >c8 d c8 <b8 a a8 >c8 e d8 c8 <b b8 >c8 d e c <a a r r8 >d f8 a8 a16 a16 g8 f8 e r8 c8 e8 e16 e16 d8 c8 <b b8 >c8 d e c <a a r e2 c2 d2 <b2 >c2 <a2 a2-. r >e2 c2 d2 <b2 a >e a2 a2-. r >e <b8 >c8 d c8 <b8 a a8 >c8 e d8 c8 <b b8 >c8 d e c <a a r r8 >d f8 a8 a16 a16 g8 f8 e r8 c8 e8 e16 e16 d8 c8 <b b8 >c8 d e c <a a r
+t150itvf o4 r a8- a8 b a8 a8- e e8 a8 a b8 a8 a- a8- a8 b >c <a e e r. f a8 >c <b8 a8 g r8 e8 g f8 e8 a- a8- a8 b >c <a e e r r a8- a8 b a8 a8- e e8 a8 a b8 a8 a- a8- a8 b >c <a e e r. f a8 >c <b8 a8 g r8 e8 g f8 e8 a- a8- a8 b >c <a e e r o4 c2 <a2 b2 a2- a2 e2 e2. r >c2 <a2 b2 a2- e a >e2 e2. r r a8- a8 b a8 a8- e e8 a8 a b8 a8 a- a8- a8 b >c <a e e r. f a8 >c <b8 a8 g r8 e8 g f8 e8 a- a8- a8 b >c <a e e r
+t150itvfl8 o2 e >e <e >e <e >e <e >e <a >a <a >a <a >a <a >a <a- >a- <a- >a- <e >e <e >e <a >a <a >a <a a b >c <d >d <d >d <d >d <d >d <c >c <c >c <c >c <c >c <a- >a- <a- >a- <e >e <e >e <a >a <a >a <a >a <a >a <e >e <e >e <e >e <e >e <a >a <a >a <a >a <a >a <a- >a- <a- >a- <e >e <e >e <a >a <a >a <a a b >c <d >d <d >d <d >d <d >d <c >c <c >c <c >c <c >c <a- >a- <a- >a- <e >e <e >e <a >a <a >a <a >a <a >a <a >e <a >e <a >e <a >e <a- >e <a- >e <a- >e <a- >e <a >e <a >e <e a e a e a- e a- e a- e r a >e <a >e <a >e <a >e <a- >e <a- >e <a- >e <a- >e <a >e <a >e <e a e a e a- e a- e a- e r e >e <e >e <e >e <e >e <a >a <a >a <a >a <a >a <a- >a- <a- >a- <e >e <e >e <a >a <a >a <a a b >c <d >d <d >d <d >d <d >d <c >c <c >c <c >c <c >c <a- >a- <a- >a- <e >e <e >e <a >a <a >a <a >a <a >a
+t150invmpl16 o4 r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. e32 r. e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. e32 r. e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. e32 r. e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. e32 r. e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. e32 r. e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. e32 r. e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. e32 r. e32 r.
+
+/  MELODY t150itvfff o5
+/   e <b8 >c8 d c8 <b8 a a8 >c8 e d8 c8 <b b8 >c8 d e c <a a r r8 >d f8 a8 a16 a16 g8 f8 e r8 c8 e8 e16 e16 d8 c8 <b b8 >c8 d e c <a a r
+/  >e <b8 >c8 d c8 <b8 a a8 >c8 e d8 c8 <b b8 >c8 d e c <a a r r8 >d f8 a8 a16 a16 g8 f8 e r8 c8 e8 e16 e16 d8 c8 <b b8 >c8 d e c <a a r
+/  e2 c2 d2 <b2 >c2 <a2 a2-. r >e2 c2 d2 <b2 a >e a2 a2-. r
+/  >e <b8 >c8 d c8 <b8 a a8 >c8 e d8 c8 <b b8 >c8 d e c <a a r r8 >d f8 a8 a16 a16 g8 f8 e r8 c8 e8 e16 e16 d8 c8 <b b8 >c8 d e c <a a r
+
+/  HARMONY t150itvf o4
+/  r a8- a8 b a8 a8- e e8 a8 a b8 a8 a- a8- a8 b >c <a e e r. f a8 >c <b8 a8 g r8 e8 g f8 e8 a- a8- a8 b >c <a e e r
+/  r a8- a8 b a8 a8- e e8 a8 a b8 a8 a- a8- a8 b >c <a e e r. f a8 >c <b8 a8 g r8 e8 g f8 e8 a- a8- a8 b >c <a e e r
+/  o4 c2 <a2 b2 a2- a2 e2 e2. r >c2 <a2 b2 a2- e a >e2 e2. r
+/  r a8- a8 b a8 a8- e e8 a8 a b8 a8 a- a8- a8 b >c <a e e r. f a8 >c <b8 a8 g r8 e8 g f8 e8 a- a8- a8 b >c <a e e r
+
+/  BASS t150itvfl8 o2
+/   e >e <e >e <e >e <e >e <a >a <a >a <a >a <a >a <a- >a- <a- >a- <e >e <e >e <a >a <a >a <a a b >c <d >d <d >d <d >d <d >d <c >c <c >c <c >c <c >c <a- >a- <a- >a- <e >e <e >e <a >a <a >a <a >a <a >a
+/  <e >e <e >e <e >e <e >e <a >a <a >a <a >a <a >a <a- >a- <a- >a- <e >e <e >e <a >a <a >a <a a b >c <d >d <d >d <d >d <d >d <c >c <c >c <c >c <c >c <a- >a- <a- >a- <e >e <e >e <a >a <a >a <a >a <a >a
+/  <a >e <a >e <a >e <a >e <a- >e <a- >e <a- >e <a- >e <a >e <a >e <e a e a e a- e a- e a- e r a >e <a >e <a >e <a >e <a- >e <a- >e <a- >e <a- >e <a >e <a >e <e a e a e a- e a- e a- e r
+/   e >e <e >e <e >e <e >e <a >a <a >a <a >a <a >a <a- >a- <a- >a- <e >e <e >e <a >a <a >a <a a b >c <d >d <d >d <d >d <d >d <c >c <c >c <c >c <c >c <a- >a- <a- >a- <e >e <e >e <a >a <a >a <a >a <a >a
+
+/  SNARE t150invmpl16 o4
+/  r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. e32 r. e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. e32 r. e32 r.
+/  r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. e32 r. e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. e32 r. e32 r.
+/  r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. e32 r. e32 r.
+/  r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. e32 r. e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. r8 e32 r. e32 r. e32 r.
+
+/  Originally transcribed by jdah : https://github.com/jdah/tetris-os/blob/master/src/music.c
+/  I thought it would be easy to move to Music Macro Language, because he does something similar. The only issue being that he gives note durations in 64ths.
+/  Given that he cuts off the last 64th to have attack/decay, I am actually playing each quarter note shorter than him.
