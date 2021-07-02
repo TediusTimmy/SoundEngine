@@ -66,7 +66,14 @@ public:
     {
       olc::SOUND::InitialiseAudio(44100, 1, 8, 512);
       olc::SOUND::SetUserSynthFunction(MyCustomSynthFunction);
+      TD_SOUND::Venue::getInstance().addMusicCallback(std::bind(&SoundPlayer::OnMusicEnded, this));
       return true;
+    }
+
+   void OnMusicEnded (void)
+    {
+      // This should only be called if this was previously parsed successfully.
+      TD_SOUND::Venue::getInstance().queueMusic(soundString);
     }
 
    bool OnUserUpdate(float fElapsedTime) override
@@ -127,7 +134,6 @@ int main (int /*argc*/, char ** /*argv*/)
          std::getline(music, toPlay);
       }
     }
-   TD_SOUND::Venue::getInstance().toggleLoop();
    SoundPlayer demo (voices);
    if (demo.Construct(640, 480, 2, 2))
     {

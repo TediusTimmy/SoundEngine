@@ -1,3 +1,4 @@
+// VERSION 2
 /*
 Copyright (c) 2021, Thomas DiModica
 All rights reserved.
@@ -56,32 +57,74 @@ namespace TD_SOUND
    const std::vector<std::string>& getNoteNames();
 
    /*
-      To implement your own instrument, you need to write a class that implements InstrumentImpl.
-      The Instrument class is non-polymorphic and uses the PIMPL idiom to give Instruments value-like semantics.
-      We can pass around Instruments by value without worrying about object slicing.
-      It does mean that your instrument must be immutable: it cannot have internal state that is modified after construction.
-      It can have internal state. The RectangularWaveInstrument stores a duty cycle. That state cannot be modified, though.
+      To implement your own oscillator, you need to write a class that implements OscillatorImpl.
+      The Oscillator class is non-polymorphic and uses the PIMPL idiom to give Oscillators value-like semantics.
+      We can pass around Oscillators by value without worrying about object slicing.
+      It does mean that your oscillator must be immutable: it cannot have internal state that is modified after construction.
+      It can have internal state. The RectangularWaveOscillator stores a duty cycle. That state cannot be modified, though.
 
       Currently, the only required part of this interface is the call to note.
-      It takes the frequency to play and the global time that we are playing at.
+      It takes the frequency to play and the note time that we are playing at.
       Frequency is in Hertz, time is in seconds.
     */
-   class InstrumentImpl
+   class OscillatorImpl
     {
    public:
       virtual double note(double frequency, double time) const = 0;
-      virtual ~InstrumentImpl();
+      virtual ~OscillatorImpl();
+    };
+
+   class Oscillator
+    {
+   private:
+      std::shared_ptr<OscillatorImpl> oscillator;
+
+   public:
+      Oscillator(const std::shared_ptr<OscillatorImpl>& oscillator);
+
+      double note(double frequency, double time) const;
+
+      static Oscillator makeSineWaveOscillator();
+      static Oscillator makeTriangularWaveOscillator();
+      static Oscillator makeSquareWaveOscillator();
+      static Oscillator makeSawWaveOscillator();
+      static Oscillator makeNoiseOscillator();
+      static Oscillator makeRectangularWaveOscillator(double dutyCycle);
+    };
+
+   class EnvelopeImpl
+    {
+   public:
+      virtual double loud(double time, double releaseTime) const = 0;
+      virtual double release() const = 0; // Return the release length.
+      virtual ~EnvelopeImpl();
+    };
+
+   class Envelope
+    {
+   private:
+      std::shared_ptr<EnvelopeImpl> envelope;
+
+   public:
+      Envelope(const std::shared_ptr<EnvelopeImpl>& envelope);
+
+      double loud(double time, double releaseTime) const;
+      double release() const;
+
+      static Envelope makeDefaultAREnvelope();
     };
 
    class Instrument
     {
    private:
-      std::shared_ptr<InstrumentImpl> instrument;
+      Oscillator oscillator;
+      Envelope envelope;
 
    public:
-      Instrument(const std::shared_ptr<InstrumentImpl>& instrument);
+      Instrument(Oscillator oscillator, Envelope envelope);
 
-      double note(double frequency, double time) const;
+      double note(double frequency, double time, double releaseTime) const;
+      double release() const;
 
       static Instrument makeSineWaveInstrument();
       static Instrument makeTriangularWaveInstrument();
@@ -117,6 +160,9 @@ namespace TD_SOUND
    private:
       std::vector<Note> notes;
       size_t index;
+      std::list<Note*> activeNotes;
+
+      double endPlay(double time);
 
    public:
       Voice();
@@ -126,6 +172,7 @@ namespace TD_SOUND
       // How voices play notes currently constrains making an ADSR envelope:
       //    the release of one note can't overlap with the attack of the next note.
       double play (double time);
+      double playActive(double time) const;
       bool finished() const;
       void loop();
     };
@@ -154,6 +201,7 @@ namespace TD_SOUND
       volatile bool stopPlaying;
       volatile bool looping;
       double internalTime;
+      std::function<void(void)> hollaback;
 
       Venue();
 
@@ -163,6 +211,7 @@ namespace TD_SOUND
       void queueMusic(const Maestro& song);
       void clearQueue();
       void toggleLoop();
+      void addMusicCallback(std::function<void(void)> callOnMusicDone);
 
       double getSample(int unused, double globalTime, double timeDelta);
       static double sdGetSample(int unused, double globalTime, double timeDelta);
@@ -300,9 +349,9 @@ namespace TD_SOUND
       return names;
     }
 
-   InstrumentImpl::~InstrumentImpl() { }
+   OscillatorImpl::~OscillatorImpl() { }
 
-   class SineWaveInstrument : public InstrumentImpl
+   class SineWaveOscillator : public OscillatorImpl
     {
    public:
       double note(double frequency, double time) const override
@@ -311,7 +360,7 @@ namespace TD_SOUND
        }
     };
 
-   class TriangularWaveInstrument : public InstrumentImpl
+   class TriangularWaveOscillator : public OscillatorImpl
     {
    public:
       double note(double frequency, double time) const override
@@ -320,7 +369,7 @@ namespace TD_SOUND
        }
     };
 
-   class SquareWaveInstrument : public InstrumentImpl
+   class SquareWaveOscillator : public OscillatorImpl
     {
    public:
       double note(double frequency, double time) const override
@@ -329,7 +378,7 @@ namespace TD_SOUND
        }
     };
 
-   class SawWaveInstrument : public InstrumentImpl
+   class SawWaveOscillator : public OscillatorImpl
     {
    public:
       double note(double frequency, double time) const override
@@ -338,7 +387,7 @@ namespace TD_SOUND
        }
     };
 
-   class NoiseInstrument : public InstrumentImpl
+   class NoiseOscillator : public OscillatorImpl
     {
    public:
       double note(double frequency, double time) const override
@@ -347,13 +396,13 @@ namespace TD_SOUND
        }
     };
 
-   class RectangularWaveInstrument : public InstrumentImpl
+   class RectangularWaveOscillator : public OscillatorImpl
     {
    private:
       double duty;
 
    public:
-      RectangularWaveInstrument(double dutyCycle) : duty(dutyCycle) { }
+      RectangularWaveOscillator(double dutyCycle) : duty(dutyCycle) { }
 
       double note(double frequency, double time) const override
        {
@@ -361,46 +410,153 @@ namespace TD_SOUND
        }
     };
 
-   Instrument::Instrument(const std::shared_ptr<InstrumentImpl>& instrument) : instrument(instrument) { }
+   Oscillator::Oscillator(const std::shared_ptr<OscillatorImpl>& oscillator) : oscillator(oscillator) { }
 
-   double Instrument::note(double frequency, double time) const
+   double Oscillator::note(double frequency, double time) const
     {
-      return instrument->note(frequency, time);
+      return oscillator->note(frequency, time);
+    }
+
+   Oscillator Oscillator::makeSineWaveOscillator()
+    {
+      static std::shared_ptr<OscillatorImpl> theSineWaveGenerator = std::make_shared<SineWaveOscillator>();
+      return Oscillator(theSineWaveGenerator);
+    }
+
+   Oscillator Oscillator::makeTriangularWaveOscillator()
+    {
+      static std::shared_ptr<OscillatorImpl> theTriangularWaveGenerator = std::make_shared<TriangularWaveOscillator>();
+      return Oscillator(theTriangularWaveGenerator);
+    }
+
+   Oscillator Oscillator::makeSquareWaveOscillator()
+    {
+      static std::shared_ptr<OscillatorImpl> theSquareWaveGenerator = std::make_shared<SquareWaveOscillator>();
+      return Oscillator(theSquareWaveGenerator);
+    }
+
+   Oscillator Oscillator::makeSawWaveOscillator()
+    {
+      static std::shared_ptr<OscillatorImpl> theSawWaveGenerator = std::make_shared<SawWaveOscillator>();
+      return Oscillator(theSawWaveGenerator);
+    }
+
+   Oscillator Oscillator::makeNoiseOscillator()
+    {
+      static std::shared_ptr<OscillatorImpl> theNoiseGenerator = std::make_shared<NoiseOscillator>();
+      return Oscillator(theNoiseGenerator);
+    }
+
+   Oscillator Oscillator::makeRectangularWaveOscillator(double dutyCycle)
+    {
+      return Oscillator(std::make_shared<RectangularWaveOscillator>(dutyCycle));
+    }
+
+   EnvelopeImpl::~EnvelopeImpl() { }
+
+   class AREnvelope : public EnvelopeImpl
+    {
+   private:
+      double attackPeak;
+      double attackLength;
+      double releaseLength;
+
+   public:
+      AREnvelope() : attackPeak(1.0), attackLength(240.0 / (64 * 256) * 0.1), releaseLength(240.0 / (64 * 256) * 0.1) { }
+
+      double loud(double time, double releaseTime) const override
+       {
+         double result = 0.0;
+         if (-1.0 == releaseTime) //The note hasn't been released yet.
+          {
+            if (time < attackLength)
+             {
+               result = (time / attackLength) * attackPeak;
+             }
+            else
+             {
+               result = attackPeak;
+             }
+          }
+         else
+          {
+            if (releaseTime < attackLength)
+             {
+               result = (time / attackLength) * attackPeak;
+             }
+            else
+             {
+               result = attackPeak;
+             }
+            result = result * ((releaseTime + releaseLength - time) / releaseLength);
+          }
+         return result;
+       }
+
+      double release() const override
+       {
+         return releaseLength;
+       }
+    };
+
+   Envelope::Envelope(const std::shared_ptr<EnvelopeImpl>& envelope) : envelope(envelope) { }
+
+   double Envelope::loud(double time, double releaseTime) const
+    {
+      return envelope->loud(time, releaseTime);
+    }
+
+   double Envelope::release() const
+    {
+      return envelope->release();
+    }
+
+   Envelope Envelope::makeDefaultAREnvelope()
+    {
+      static std::shared_ptr<EnvelopeImpl> defaultAR = std::make_shared<AREnvelope>();
+      return Envelope(defaultAR);
+    }
+
+   Instrument::Instrument(Oscillator oscillator, Envelope envelope) : oscillator(oscillator), envelope(envelope) { }
+
+   double Instrument::note(double frequency, double time, double releaseTime) const
+    {
+      return envelope.loud(time, releaseTime) * oscillator.note(frequency, time);
+    }
+
+   double Instrument::release() const
+    {
+      return envelope.release();
     }
 
    Instrument Instrument::makeSineWaveInstrument()
     {
-      static std::shared_ptr<InstrumentImpl> theSineWaveGenerator = std::make_shared<SineWaveInstrument>();
-      return Instrument(theSineWaveGenerator);
+      return Instrument(Oscillator::makeSineWaveOscillator(), Envelope::makeDefaultAREnvelope());
     }
 
    Instrument Instrument::makeTriangularWaveInstrument()
     {
-      static std::shared_ptr<InstrumentImpl> theTriangularWaveGenerator = std::make_shared<TriangularWaveInstrument>();
-      return Instrument(theTriangularWaveGenerator);
+      return Instrument(Oscillator::makeTriangularWaveOscillator(), Envelope::makeDefaultAREnvelope());
     }
 
    Instrument Instrument::makeSquareWaveInstrument()
     {
-      static std::shared_ptr<InstrumentImpl> theSquareWaveGenerator = std::make_shared<SquareWaveInstrument>();
-      return Instrument(theSquareWaveGenerator);
+      return Instrument(Oscillator::makeSquareWaveOscillator(), Envelope::makeDefaultAREnvelope());
     }
 
    Instrument Instrument::makeSawWaveInstrument()
     {
-      static std::shared_ptr<InstrumentImpl> theSawWaveGenerator = std::make_shared<SawWaveInstrument>();
-      return Instrument(theSawWaveGenerator);
+      return Instrument(Oscillator::makeSawWaveOscillator(), Envelope::makeDefaultAREnvelope());
     }
 
    Instrument Instrument::makeNoiseInstrument()
     {
-      static std::shared_ptr<InstrumentImpl> theNoiseGenerator = std::make_shared<NoiseInstrument>();
-      return Instrument(theNoiseGenerator);
+      return Instrument(Oscillator::makeNoiseOscillator(), Envelope::makeDefaultAREnvelope());
     }
 
    Instrument Instrument::makeRectangularWaveInstrument(double dutyCycle)
     {
-      return Instrument(std::make_shared<RectangularWaveInstrument>(dutyCycle));
+      return Instrument(Oscillator::makeRectangularWaveOscillator(dutyCycle), Envelope::makeDefaultAREnvelope());
     }
 
    Note::Note(Instrument instrument, double frequency, double startTime, double duration, double volume) :
@@ -413,30 +569,24 @@ namespace TD_SOUND
 
    bool Note::after (double time) const
     {
-      return time > (startTime + duration);
+      return time > (startTime + duration + instrument.release());
     }
 
    double Note::play (double time) const
     {
-      // First modifier: ar (attack/release).
-      // 10% of a 64th note at 256 bpm will be fade in, with a symmetric fade out ending the note early.
-      // This will help reduce speaker pop when changing note with full-length notes.
-      double ar = 1.0;
-      const double arTime = 240.0 / (64 * 256) * 0.1;
       double noteTime = time - startTime;
-      if (noteTime < arTime)
-       {
-         ar = noteTime / arTime;
-       }
-      else if ((duration - noteTime) < arTime)
-       {
-         ar = (duration - noteTime) / arTime;
-       }
-      return ar * volume * instrument.note(frequency, time);
+      return volume * instrument.note(frequency, noteTime, ((noteTime < duration) ? -1.0 : duration));
     }
 
-   Voice::Voice() : notes(), index(0U) { }
-   Voice::Voice(const std::vector<Note> notes) : notes(notes), index(0U) { }
+   Voice::Voice() : notes(), index(0U), activeNotes() { }
+   Voice::Voice(const std::vector<Note> notes) : notes(notes), index(0U), activeNotes() { }
+
+   double Voice::endPlay(double time)
+    {
+      double result = playActive(time);
+      activeNotes.remove_if([=](const Note* note) { return note->after(time); });
+      return result;
+    }
 
    double Voice::play (double time)
     {
@@ -448,25 +598,41 @@ namespace TD_SOUND
       // Exit if we are done.
       if (index == notes.size())
        {
-         return 0.0;
+         return endPlay(time);
        }
       // If this note hasn't started, we are resting.
       if ((index < notes.size()) && (true == notes[index].before(time)))
        {
-         return 0.0;
+         return endPlay(time);
        }
       // We must be playing this note right now.
-      return notes[index].play(time);
+      while ((index < notes.size()) && (false == notes[index].before(time)))
+       {
+         activeNotes.push_back(&(notes[index]));
+         ++index;
+       }
+      return endPlay(time);
+    }
+
+   double Voice::playActive(double time) const
+    {
+      double sum = 0.0;
+      for (const Note * note : activeNotes)
+       {
+         sum += note->play(time);
+       }
+      return sum;
     }
 
    bool Voice::finished() const
     {
-      return index == notes.size();
+      return (index == notes.size() && (0U == activeNotes.size()));
     }
 
    void Voice::loop()
     {
       index = 0U;
+      activeNotes.clear();
     }
 
    class StringProcessor
@@ -575,10 +741,6 @@ namespace TD_SOUND
       double volume = 0.5;
       double time = 0.0;
 
-      double tempDuration = articulation;
-      double tempLength = noteLength;
-      double tempVolume = volume;
-
       std::vector<Note> notes;
 
       if (totalNotes != static_cast<int>(pitches.size()))
@@ -603,7 +765,12 @@ namespace TD_SOUND
             int in = map[command.consume() - 'A'];
             int note = currentOctave * notesPerOctave + in;
 
+            double tempDuration = articulation;
+            double tempLength = noteLength;
+            double tempVolume = volume;
+
             bool modifiers = true;
+            bool advance = true;
             double nextDot = tempLength * 0.5;
             while (true == modifiers)
              {
@@ -662,6 +829,11 @@ namespace TD_SOUND
                   command.consume();
                   tempVolume = std::min(tempVolume + 0.125, 1.0);
                   break;
+               case ',':
+                  command.consume();
+                  modifiers = false;
+                  advance = false;
+                  break;
                default:
                   modifiers = false;
                   break;
@@ -669,12 +841,10 @@ namespace TD_SOUND
              }
 
             notes.emplace_back(instrument, pitches[note], time, tempLength * tempDuration, tempVolume);
-            time += tempLength;
-
-            // Finally, reinitialize these
-            tempDuration = articulation;
-            tempLength = noteLength;
-            tempVolume = volume;
+            if (true == advance)
+             {
+               time += tempLength;
+             }
           }
             break;
 
@@ -704,7 +874,6 @@ namespace TD_SOUND
                throw std::invalid_argument("Asked to play music either too slow or too fast.");
              }
             noteLength = 240.0 / (currentBeatNote * currentTempo);
-            tempLength = noteLength;
             break;
 
          case 'L':
@@ -715,7 +884,6 @@ namespace TD_SOUND
                throw std::invalid_argument("Invalid note length.");
              }
             noteLength = 240.0 / (currentBeatNote * currentTempo);
-            tempLength = noteLength;
             break;
 
          case 'O':
@@ -737,9 +905,9 @@ namespace TD_SOUND
              }
             if (0 != note)
              {
-               notes.emplace_back(instrument, pitches[note - 1], time, tempLength * tempDuration, tempVolume);
+               notes.emplace_back(instrument, pitches[note - 1], time, noteLength * articulation, volume);
              }
-            time += tempLength;
+            time += noteLength;
           }
             break;
 
@@ -747,6 +915,7 @@ namespace TD_SOUND
          case 'R': // Because "pauses" are RESTS
           {
             command.consume();
+            double tempLength = noteLength;
             // Allow no length to be specified, to indicate using the current note length, just like for notes.
             if ((command.peek() >= '0') && (command.peek() <= '9'))
             {
@@ -766,7 +935,6 @@ namespace TD_SOUND
                nextDot *= 0.5;
              }
             time += tempLength;
-            tempLength = noteLength;
           }
             break;
 
@@ -782,17 +950,14 @@ namespace TD_SOUND
             case 'L':
                command.consume();
                articulation = 1.0;
-               tempDuration = articulation;
                break;
             case 'N':
                command.consume();
                articulation = 7.0 / 8.0;
-               tempDuration = articulation;
                break;
             case 'S':
                command.consume();
                articulation = 3.0 / 4.0;
-               tempDuration = articulation;
                break;
             default:
                throw std::invalid_argument(std::string("Did not understand music ('M') command component \'") + command.peek() + "\'.");
@@ -934,7 +1099,6 @@ namespace TD_SOUND
             default:
                throw std::invalid_argument("Invalid volume specification.");
              }
-            tempVolume = volume;
             break;
 
          default:
@@ -991,7 +1155,7 @@ namespace TD_SOUND
        }
     }
 
-   Venue::Venue() : program(), stopPlaying(false), looping(false), internalTime(-1.0) { }
+   Venue::Venue() : program(), stopPlaying(false), looping(false), internalTime(-1.0), hollaback(nullptr) { }
 
    Venue& Venue::getInstance()
     {
@@ -1019,6 +1183,11 @@ namespace TD_SOUND
       looping = !looping;
     }
 
+   void Venue::addMusicCallback(std::function<void(void)> callOnMusicDone)
+    {
+      hollaback = callOnMusicDone;
+    }
+
    double Venue::getSample(int unused, double /*globalTime*/, double timeDelta)
     {
       if (0 != unused) // Is this the wrong channel?
@@ -1028,7 +1197,12 @@ namespace TD_SOUND
       if (true == stopPlaying) // Have we been told to stop?
        {
          program.clear();
+         stopPlaying = false;
          internalTime = -1.0;
+         if (nullptr != hollaback) // Should I tell someone about this?
+          {
+            hollaback();
+          }
        }
       if (0U == program.size()) // Is there nothing to play?
        {
@@ -1036,7 +1210,7 @@ namespace TD_SOUND
        }
       if (true == program.front().finished()) // Has the most recent song ended?
        {
-         if (true == looping)
+         if (true == looping) // But, is it looping?
           {
             program.front().loop();
           }
@@ -1045,6 +1219,10 @@ namespace TD_SOUND
             program.pop_front();
           }
          internalTime = -1.0;
+       }
+      if ((0U == program.size()) && (nullptr != hollaback)) // Should I tell someone to fill the queue?
+       {
+         hollaback();
        }
       if (0U == program.size()) // Is there NOW nothing to play?
        {

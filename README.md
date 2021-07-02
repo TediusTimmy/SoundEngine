@@ -3,6 +3,8 @@ TD Sound Engine
 
 An implementation of Music Macro Language (from QBasic and other BASICs) for Pixel Game Engine.
 
+VERSION 2
+
 Usage
 -----
 
@@ -15,6 +17,7 @@ If you just want it to handle background music, you can have a line like this so
 To actually play music: call `TD_SOUND::Venue::getInstance().queueMusic()` passing in a `std::vector` of `std::string`. Each string is expected to be a complete song for one voice. All voices will be played simultaneously (and scaled by the number of voices to attempt to level the volume). Polyphony is achieved through multiple voices. The queueMusic function will throw a `std::invalid_argument` exception if the string cannot be parsed, and will remove any voice that doesn't make sound.
 
 The song at the front of the queue can be looped using `TD_SOUND::Venue::getInstance().toggleLoop()`.
+Also, you can install a callback for when the last song in the queue ends: `TD_SOUND::Venue::getInstance().addMusicCallback()`. The called function takes no arguments and will not return anything.
 
 Music Macro Language
 --------------------
@@ -40,7 +43,6 @@ The Music Macro Language is a string representation of music. You can find many 
 | `V`x`;`    | Set the volume to a preset. The semicolon is optional, and allows, for instance, having a rest after setting the volume to piano, or playing an F after setting the volume to forte. |
 | `I`x       | Set the current instrument. See table below. |
 
-Note: the comma `,` of QB64 is not implemented.
 | Modifier | Description |
 |----------|-------------|
 | `#` or `+` | Make the preceding note sharp. Each sharp will move a semitone up. It is an error to sharp O8 B. |
@@ -50,6 +52,7 @@ Note: the comma `,` of QB64 is not implemented.
 | `_`        | Play the preceding note tenuto, or for the entire duration of the current beat. |
 | `'`        | Play the preceding note staccato, or for 3/4 of the current beat. |
 | `^`        | Play the preceding note marcato. For this implementation, that means play it at the next higher volume level, or 12.5% louder. |
+| `,`        | This modifier stops the processing of modifiers. It plays the following note at the same time as the current note. No sound leveling is applied to polyphony here. The last note determines when the next note will play. As in `L4O3C1,>C1,>CEGE` will play in the duration of one whole note. |
 
 While pianississimo and fotrississimo are not, I feel, common, adding them gives me eight levels to work with.
 | Sound Level | Description | Volume |
@@ -76,9 +79,9 @@ While pianississimo and fotrississimo are not, I feel, common, adding them gives
 Custom Instruments
 ------------------
 
-This final bit will be about custom instruments.
+This final bit will be about custom instruments. After I actually watched the videos on writing a software synthesizer, I changed this architecture up a bit.
 
-To create a custom instrument, one needs to implement `TD_SOUND::InstrumentImpl`. This class has a `note` function which takes the frequency to play (in Hertz), and the global time to play it at (in seconds). Yes. That is GLOBAL time, which will confound your attempts to give the instrument a proper ADSR (or AHDSR or DAHDSR) envelope. Currently, the implementation of `TD_SOUND::Voice` doesn't allow the release of one note to overlap the attack of the next, so that's a problem. Instrument implementations should not have modifiable internal state. Any internal state should be fixed at construction. You then instantiate a `TD_SOUND::Instrument` class with a shared pointer to an instance of your `TD_SOUND::InstrumentImpl` class. The PIMPL idiom is used here to allow `TD_SOUND::Instrument` to be handled with value-like semantics, as I feel value-like semantics are easier to understand, and easier to understand programs are more likely to be correct.
+Now, I am following the advice that an instrument is an oscillator and an envelope. So, one needs to implement `TD_SOUND::OscillatorImpl` and possibly `TD_SOUND::EnvelopeImpl` (if the default AR Envelope doens't work for you). The interface for `TD_SOUND::OscillatorImpl` is the same as the old interface to `TD_SOUND::InstrumentImpl`, with one exception: the `note` function is given the current time in note time. As a refresher, the `TD_SOUND::OscillatorImpl` class has a `note` function which takes the frequency to play (in Hertz) and the note-relative time to play it at (in seconds), and it returns the same from -1.0 to 1.0. For every unique note, time will always start at zero. The `TD_SOUND::EnvelopeImpl` has two functions: `release` and `loud`. The `release` function is expected to return the length of the release for the instrument (in seconds). This is expected to be constant and not vary by note played or anything. The `loud` function is given the current note time (in seconds) and the time the note was released at ((in seconds) or -1.0 if the note hasn't been released yet), and it returns the amplitude of the note, from 0.0 to 1.0. Oscillator and Envelope implementations should not have modifiable internal state. Any internal state should be fixed at construction. You then instantiate a `TD_SOUND::Oscillator` or `TD_SOUND::Envelope` class with a shared pointer to an instance of your `TD_SOUND::OscillatorImpl` or `TD_SOUND::EnvelopeImpl` class. The PIMPL idiom is used here to allow `TD_SOUND::Oscillator`, `TD_SOUND::Envelope`, and `TD_SOUND::Instrument` to be handled with value-like semantics, as I feel value-like semantics are easier to understand, and easier to understand programs are more likely to be correct. FINALLY, you construct your custom Instrument by passing in your custom Oscillator and Envelope.
 
 To use your custom instrument with MML music: you will need to call `TD_SOUND::buildVoiceFromString()` passing the custom instrument as the second argument (and don't change the instrument in the string). This builds a `TD_SOUND::Voice` using your custom instrument, and it needs to be put into a `std::vector` and passed to construct a `TD_SOUND::Maestro`. Finally, this is passed to `TD_SOUND::Venue::getInstance().queueMusic()`. It is annoying, but possible.
 
@@ -86,5 +89,5 @@ Data Races
 ----------
 
 There are two race conditions that I can think of, one of which effects `olc::SOUND` as well:
-* If you queue up a piece of music right after calling `TD_SOUND::Venue::getInstance().clearQueue()`, it may not be played. This is because `TD_SOUND::Venue` doesn't have a `bFlagForStop` as `olc::SOUND` does, and there is no synchronization between the sound thread and the main thread.
+* If you call `TD_SOUND::Venue::getInstance().clearQueue()` and then immediately queue up a new piece to be played, it may not be played. There's a race between the calling thread and the sound thread, and sometimes the sound thread will lose. There is no race when `TD_SOUND::Venue::getInstance().addMusicCallback()` is used, as the callback is called from the sound thread. The proper way to flush the music queue and start completely new music is to install a callback that will populate the new music and then call `TD_SOUND::Venue::getInstance().clearQueue()` (unless you are already doing everything from the audio thread).
 * There is a minute chance of a crash if one queues up a song at the exact instant one song ends. I'm not sure how well a std::list can handle concurrent modification. To my defense, `olc::SOUND` also adds items to a std::list in one thread and removes items from that same list in a different thread.
