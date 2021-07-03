@@ -47,6 +47,7 @@ The Music Macro Language is a string representation of music. You can find many 
 | `V`nnn     | Set the volume between 0 and 100%. |
 | `V`x`;`    | Set the volume to a preset. The semicolon is optional, and allows, for instance, having a rest after setting the volume to piano, or playing an F after setting the volume to forte. |
 | `I`x       | Set the current instrument. See table below. |
+| `MA`nnn    | Retune the nine octaves of twelve-tone equal temperament using nnn as the frequency of A4. The default is, of course, 440, but this allows playing music tuned to 435 or 466. This command doesn't validate that the frequency makes sense, but it must be an integer. |
 
 | Modifier | Description |
 |----------|-------------|

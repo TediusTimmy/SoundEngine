@@ -741,7 +741,7 @@ namespace TD_SOUND
        }
     };
 
-   Voice buildVoiceFromString(const std::string& input, const std::map<char, Instrument>& instruments, const std::vector<double>& pitches)
+   Voice buildVoiceFromString(const std::string& input, const std::map<char, Instrument>& instruments, const std::vector<double>& inPitches)
     {
       static const int map [] = { 9, 11, 0, 2, 4, 5, 7 };
 
@@ -757,10 +757,11 @@ namespace TD_SOUND
 
       std::vector<Note> notes;
 
-      if (totalNotes != static_cast<int>(pitches.size()))
+      if (totalNotes != static_cast<int>(inPitches.size()))
        {
          throw std::invalid_argument("Note array of invalid size.");
        }
+      std::vector<double> pitches = inPitches;
 
       if (instruments.find('\0') == instruments.end())
        {
@@ -978,6 +979,13 @@ namespace TD_SOUND
             case 'S':
                command.consume();
                articulation = 3.0 / 4.0;
+               break;
+            case 'A':
+             {
+               command.consume();
+               int freq = command.getNumber();
+               pitches = generateTwelveToneEqual(freq);
+             }
                break;
             default:
                throw std::invalid_argument(std::string("Did not understand music ('M') command component \'") + command.peek() + "\'.");
