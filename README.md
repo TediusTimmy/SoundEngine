@@ -74,11 +74,12 @@ While pianississimo and fotrississimo are not, I feel, common, adding them gives
 | Instrument | Description |
 |------------|-------------|
 | `S`   | Sine Wave |
-| `Q`   | Square Wave |
+| `Q`   | Square Wave : this is the default instrument |
 | `T`   | Triangular Wave |
 | `W`   | Saw Wave (harsh synthetic version) |
 | `N`   | Noise |
 | `P`nn | Rectangular Wave with an nn% duty cycle, between 1 and 99. |
+| `X`c  | Extended : the next character will be used to identify an implementation-specific instrument. Implementation-specific instruments may not have arguments. |
 
 
 Custom Instruments
@@ -88,7 +89,7 @@ This final bit will be about custom instruments. After I actually watched the vi
 
 Now, I am following the advice that an instrument is an oscillator and an envelope. So, one needs to implement `TD_SOUND::OscillatorImpl` and possibly `TD_SOUND::EnvelopeImpl` (if the default AR Envelope doens't work for you). The interface for `TD_SOUND::OscillatorImpl` is the same as the old interface to `TD_SOUND::InstrumentImpl`, with one exception: the `note` function is given the current time in note time. As a refresher, the `TD_SOUND::OscillatorImpl` class has a `note` function which takes the frequency to play (in Hertz) and the note-relative time to play it at (in seconds), and it returns the same from -1.0 to 1.0. For every unique note, time will always start at zero. The `TD_SOUND::EnvelopeImpl` has two functions: `release` and `loud`. The `release` function is expected to return the length of the release for the instrument (in seconds). This is expected to be constant and not vary by note played or anything. The `loud` function is given the current note time (in seconds) and the time the note was released at ((in seconds) or -1.0 if the note hasn't been released yet), and it returns the amplitude of the note, from 0.0 to 1.0. Oscillator and Envelope implementations should not have modifiable internal state. Any internal state should be fixed at construction. You then instantiate a `TD_SOUND::Oscillator` or `TD_SOUND::Envelope` class with a shared pointer to an instance of your `TD_SOUND::OscillatorImpl` or `TD_SOUND::EnvelopeImpl` class. The PIMPL idiom is used here to allow `TD_SOUND::Oscillator`, `TD_SOUND::Envelope`, and `TD_SOUND::Instrument` to be handled with value-like semantics, as I feel value-like semantics are easier to understand, and easier to understand programs are more likely to be correct. FINALLY, you construct your custom Instrument by passing in your custom Oscillator and Envelope.
 
-To use your custom instrument with MML music: you will need to call `TD_SOUND::buildVoiceFromString()` passing the custom instrument as the second argument (and don't change the instrument in the string). This builds a `TD_SOUND::Voice` using your custom instrument, and it needs to be put into a `std::vector` and passed to construct a `TD_SOUND::Maestro`. Finally, this is passed to `TD_SOUND::Venue::getInstance().queueMusic()`. It is annoying, but possible.
+To use your custom instrument with MML music: you will need to build a map as `std::map<char, TD_SOUND::Instrument>` and pass that as the second argument to `TD_SOUND::Venue::getInstance().queueMusic()`. Instrument `'\0'` is the default instrument. Other than that, you can use `IX` to identify any custom instrument you want to use in your composition.
 
 Data Races
 ----------

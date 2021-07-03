@@ -172,10 +172,9 @@ public:
     }
  };
 
-TD_SOUND::Maestro buildMusic(const std::vector<std::string>& composition)
+std::map<char, TD_SOUND::Instrument> buildInstrument()
  {
-   std::vector<TD_SOUND::Voice> voices;
-   TD_SOUND::Instrument harmonica (TD_SOUND::Oscillator(std::make_shared<CompoundOscillator>(CompoundOscillator(
+   static TD_SOUND::Instrument harmonica (TD_SOUND::Oscillator(std::make_shared<CompoundOscillator>(CompoundOscillator(
     {
       OscillatorHolder(0.3 * 1.0, TD_SOUND::Oscillator(std::make_shared<SawWaveWithLowFrequencyOscillations>(0.001, 5.0)), 0.5),
       OscillatorHolder(0.3 * 1.0, TD_SOUND::Oscillator(std::make_shared<SquareWaveWithLowFrequencyOscillations>(0.001, 5.0)), 1.0),
@@ -183,16 +182,9 @@ TD_SOUND::Maestro buildMusic(const std::vector<std::string>& composition)
       OscillatorHolder(0.3 * 0.05, TD_SOUND::Oscillator::makeNoiseOscillator(), 4.0)
     }))), TD_SOUND::Envelope(std::make_shared<ADSREnvelope>(1.0, 0.0, 1.0, 0.95, 0.1)));
 
-   for (auto voice : composition)
-    {
-      voices.emplace_back(TD_SOUND::buildVoiceFromString(voice, harmonica));
-      if (true == voices.back().finished()) // Throw out empty voices.
-       {
-         voices.pop_back();
-       }
-    }
-
-   return TD_SOUND::Maestro(voices);
+   std::map<char, TD_SOUND::Instrument> result;
+   result.insert(std::make_pair('\0', harmonica));
+   return result;
  }
 
 class SoundPlayer : public olc::PixelGameEngine
@@ -232,7 +224,7 @@ public:
    void OnMusicEnded (void)
     {
       // This should only be called if this was previously parsed successfully.
-      TD_SOUND::Venue::getInstance().queueMusic(buildMusic(soundString));
+      TD_SOUND::Venue::getInstance().queueMusic(soundString, buildInstrument());
     }
 
    bool OnUserUpdate(float fElapsedTime) override
@@ -253,7 +245,7 @@ public:
          started = true;
          try
           {
-            TD_SOUND::Venue::getInstance().queueMusic(buildMusic(soundString));
+            TD_SOUND::Venue::getInstance().queueMusic(soundString, buildInstrument());
           }
          catch (const std::invalid_argument& e)
           {

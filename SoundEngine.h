@@ -1,4 +1,4 @@
-// VERSION 2
+// VERSION 2.1
 /*
 Copyright (c) 2021, Thomas DiModica
 All rights reserved.
@@ -177,7 +177,8 @@ namespace TD_SOUND
       void loop();
     };
 
-   Voice buildVoiceFromString(const std::string& input, Instrument instrument = Instrument::makeSineWaveInstrument(), const std::vector<double>& pitches = getStandardTwelveToneEqualNotes());
+   const std::map<char, Instrument>& getDefaultInstrument();
+   Voice buildVoiceFromString(const std::string& input, const std::map<char, Instrument>& instruments = getDefaultInstrument(), const std::vector<double>& pitches = getStandardTwelveToneEqualNotes());
 
    class Maestro
     {
@@ -186,7 +187,7 @@ namespace TD_SOUND
 
    public:
       Maestro() = default;
-      Maestro(const std::vector<std::string>& music);
+      Maestro(const std::vector<std::string>& music, const std::map<char, Instrument>& instruments = getDefaultInstrument());
       Maestro(const std::vector<Voice>& choir);
 
       double play(double time);
@@ -207,7 +208,7 @@ namespace TD_SOUND
 
    public:
       static Venue& getInstance();
-      void queueMusic(const std::vector<std::string>& music);
+      void queueMusic(const std::vector<std::string>& music, const std::map<char, Instrument>& instruments = getDefaultInstrument());
       void queueMusic(const Maestro& song);
       void clearQueue();
       void toggleLoop();
@@ -635,6 +636,19 @@ namespace TD_SOUND
       activeNotes.clear();
     }
 
+   std::map<char, Instrument> makeDefaultInstrument()
+    {
+      std::map<char, Instrument> result;
+      result.insert(std::make_pair('\0', Instrument::makeSquareWaveInstrument()));
+      return result;
+    }
+
+   const std::map<char, Instrument>& getDefaultInstrument()
+    {
+      static const std::map<char, Instrument> instruments = makeDefaultInstrument();
+      return instruments;
+    }
+
    class StringProcessor
     {
    public:
@@ -727,7 +741,7 @@ namespace TD_SOUND
        }
     };
 
-   Voice buildVoiceFromString(const std::string& input, Instrument instrument, const std::vector<double>& pitches)
+   Voice buildVoiceFromString(const std::string& input, const std::map<char, Instrument>& instruments, const std::vector<double>& pitches)
     {
       static const int map [] = { 9, 11, 0, 2, 4, 5, 7 };
 
@@ -747,6 +761,12 @@ namespace TD_SOUND
        {
          throw std::invalid_argument("Note array of invalid size.");
        }
+
+      if (instruments.find('\0') == instruments.end())
+       {
+         throw std::invalid_argument("No default instrument in instrument list.");
+       }
+      Instrument instrument = instruments.find('\0')->second;
 
       StringProcessor command (input);
 
@@ -988,6 +1008,14 @@ namespace TD_SOUND
                command.consume();
                instrument = Instrument::makeNoiseInstrument();
                break;
+            case 'X':
+               command.consume();
+               if (instruments.end() == instruments.find(command.peek()))
+                {
+                  throw std::invalid_argument("Invalid instrument.");
+                }
+               instrument = instruments.find(command.consume())->second;
+               break;
             case 'P':
              {
                command.consume();
@@ -1109,11 +1137,11 @@ namespace TD_SOUND
       return Voice(notes);
     }
 
-   Maestro::Maestro(const std::vector<std::string>& music) : choir()
+   Maestro::Maestro(const std::vector<std::string>& music, const std::map<char, Instrument>& instruments) : choir()
     {
       for (auto& voice : music)
        {
-         choir.emplace_back(buildVoiceFromString(voice));
+         choir.emplace_back(buildVoiceFromString(voice, instruments));
          if (true == choir.back().finished()) // Throw out empty voices.
           {
             choir.pop_back();
@@ -1163,9 +1191,9 @@ namespace TD_SOUND
       return instance;
     }
 
-   void Venue::queueMusic(const std::vector<std::string>& music)
+   void Venue::queueMusic(const std::vector<std::string>& music, const std::map<char, Instrument>& instruments)
     {
-      program.emplace_back(music);
+      program.emplace_back(music, instruments);
     }
 
    void Venue::queueMusic(const Maestro& song)
