@@ -49,6 +49,9 @@ followed by the entire license text.
 #include <memory>
 #include <string>
 #include <algorithm>
+#include <list>
+#include <map>
+#include <stdexcept>
 
 namespace TD_SOUND
  {
